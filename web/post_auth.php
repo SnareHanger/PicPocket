@@ -8,7 +8,7 @@ $con = mysql_connect($host,$db_user,$db_pwd) or die("MySQL Error: " . mysql_erro
 if(!$con)
 {
 	echo "Failed to make connection.";
-	echo json_encode(array('logged' => true, 'message' => "Failed to make connection."));
+	// echo json_encode(array('logged' => true, 'message' => "Failed to make connection."));
 	exit;	
 }
 
@@ -22,15 +22,25 @@ if(!$db)
 $username = $_POST['username'];
 $password = $_POST['password'];
 
-$sql = "SELECT * FROM users WHERE username = '" . $username . "' AND password = '" . $password . "'";
+// $username = $_GET['username'];
+// $password = $_GET['password'];
+
+$sql = sprintf("SELECT * FROM Users WHERE username = '%s' AND password = '%s'", 
+	mysql_real_escape_string($username), 
+	mysql_real_escape_string($password));
+
+// echo $sql;
+	
 $query = mysql_query($sql);
+
+// echo "num rows: " . mysql_num_rows($query);
 
 if(mysql_num_rows($query) > 0)
 {
 	$row = mysql_fetch_array($query);
 	$response = array(
 		'logged' => true,
-		'name' => $row['name'],
+		'username' => $row['username'],
 		'email' => $row['email']
 		);
 	
@@ -40,7 +50,7 @@ else
 {
 	$response = array(
 		'logged' => false,
-		'message' => 'Invalid Username and/or Password'	
+		'message' => 'Invalid Username and/or Password'	. $sql
 	);
 	echo json_encode($response);
 }
